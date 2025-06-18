@@ -1,10 +1,10 @@
 import React from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore'
+import { getFirestore, collection, query, orderBy, where, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { format } from 'date-fns'
+import { format, isToday, startOfDay, endOfDay } from 'date-fns'
 
 const firebaseConfig = {
   apiKey: "AIzaSyAfASez0BnqEkEMxTLqJuE_bsmagV_IH_Y",
@@ -27,7 +27,15 @@ export default function App() {
   const inputRef = useRef(null)
 
   useEffect(() => {
-    const q = query(collection(db, "messages"), orderBy("timestamp", "asc"))
+    const todayStart = startOfDay(new Date())
+    const todayEnd = endOfDay(new Date())
+    
+    const q = query(
+      collection(db, "messages"),
+      where("timestamp", ">=", todayStart),
+      where("timestamp", "<=", todayEnd),
+      orderBy("timestamp", "asc")
+    )
     
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const messagesData = []
@@ -111,7 +119,7 @@ export default function App() {
         <div className="chat-header">
           <div className="header-content">
             <div className="avatar">
-              <img src="https://i.imgur.com/JgYD2nQ.png" alt="SMIT Helpdesk" />
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTVHLTpqurzr0pGHnwuBzhzCApOB0Wuz0QwvN6k16HGHqYyC526786gVV4hcX-6bQFR5Wg&usqp=CAU" alt="SMIT Helpdesk" />
             </div>
             <div className="header-info">
               <h2>SMIT Helpdesk</h2>
@@ -140,11 +148,11 @@ export default function App() {
             <div className="empty-state">
               <div className="empty-icon">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#7c8b96" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M21 15C16.4183 15 12 16.4183 12 20C12 16.4183 7.58172 15 3 15V5C7.58172 5 12 3.58172 12 0C12 3.58172 16.4183 5 21 5V15Z" stroke="#7c8b96" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <h3>No messages yet</h3>
-              <p>Start the conversation with SMIT Helpdesk</p>
+              <h3>No messages today</h3>
+              <p>Start a new conversation with SMIT Helpdesk</p>
             </div>
           ) : (
             <div className="messages-list">
